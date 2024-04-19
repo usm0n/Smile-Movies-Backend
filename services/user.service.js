@@ -2,13 +2,21 @@ import Token from "../schemas/token.schema.js";
 import User from "../schemas/user.schema.js";
 import crypto from "crypto";
 import { sendMail } from "../utils/sendMail.js";
+import Movie from "../schemas/movie.schema.js";
+import mongoose from "mongoose";
 
 //get user by properties
 export const getAllUsers = async (req, res) => {
   try {
     await User.find({})
       .then((users) => {
-        res.status(200).json(users);
+        if (!users.length) {
+          res.status(404).json({
+            message: "Users not found",
+          });
+        } else {
+          res.status(200).json(users);
+        }
       })
       .catch((err) => {
         res.status(500).json({
@@ -166,23 +174,7 @@ export const deleteUserByEmail = async (req, res) => {
 // login && register user
 export const registerUser = async (req, res) => {
   try {
-    const newUser = new User({
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      email: req.body.email,
-      phone: req.body.phone,
-      password: req.body.password,
-      isPremiumUser: false,
-      isOwner: false,
-      isAdmin: false,
-      watchlater: [],
-      favourites: [],
-      isVerified: false,
-      isBanned: false,
-      isBlocked: false,
-      defaultLanguage: req.body.defaultLanguage,
-      notifications: req.body.notifications,
-    });
+    const newUser = new User(req.body);
     const isUserExist = await User.findOne({ email: req.body.email });
     if (isUserExist) {
       res.status(409).json({
@@ -200,7 +192,7 @@ export const registerUser = async (req, res) => {
             newUser.email,
             "Please Verify your account",
             `Your verification code is ${token.token}`
-          )
+          );
           res.status(200).json(newUser);
         })
         .catch((err) => {
@@ -318,5 +310,115 @@ export const resendToken = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json("Error at resending token" + error);
+  }
+};
+
+// add to favorites or watch later
+export const addMovieToFavourites = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const movieId = req.params.movieId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else {
+      const movie = await Movie.findById(movieId);
+      if (!movie) {
+        res.status(404).json({
+          message: "Movie not found",
+        });
+      } else {
+        if (user.favourites.includes(movieId)) {
+          res.status(400).json({
+            message: "Movie already in favourites",
+          });
+        } else {
+          user.favourites.push(movieId);
+          await user.save();
+          res.status(200).json({
+            message: "Movie added to favourites",
+          });
+        }
+      }
+    }
+  } catch (error) {
+    res.status(500).json("error: " + error);
+  }
+};
+
+export const removeMovieFromFavourites = async (req, res) => {
+  const userId = req.params.userId;
+  const favMovieId = req.params.favMovieId;
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404).json({
+      message: "User not found",
+    });
+  } else if (!user.favourites.includes(favMovieId)) {
+    res.status(404).json({
+      message: "Movie not found in favorites",
+    });
+  } else {
+    user.favourites = user.favourites.filter((movie) => movie != favMovieId);
+    await user.save();
+    res.status(200).json({
+      message: "Movie removed from favourites",
+    });
+  }
+};
+
+export const addMovieToWatchLater = async (req, res) => {
+  const userId = req.params.userId;
+  const movieId = req.params.movieId;
+  const user = await User.findById(userId);
+
+  if (!user) {
+    res.status(404).json({
+      message: "User not found",
+    });
+  } else {
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      res.status(404).json({
+        message: "Movie not found",
+      });
+    } else {
+      if (user.watchlater.includes(movieId)) {
+        res.status(400).json({
+          message: "Movie already saved to watch later",
+        });
+      } else {
+        user.watchlater.push(movieId);
+        await user.save();
+        res.status(200).json({
+          message: "Movie added to watch later",
+        });
+      }
+    }
+  }
+};
+
+export const removeMovieFromWatchLater = async (req, res) => {
+  const userId = req.params.userId;
+  const watchLaterMovieId = req.params.wlmId;
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404).json({
+      message: "User not found",
+    });
+  } else if (!user.watchlater.includes(watchLaterMovieId)) {
+    res.status(404).json({
+      message: "Movie not found in watch later",
+    });
+  } else {
+    user.watchlater = user.watchlater.filter(
+      (movie) => movie != watchLaterMovieId
+    );
+    await user.save();
+    res.status(200).json({
+      message: "Movie removed from watch later",
+    });
   }
 };
