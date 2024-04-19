@@ -32,6 +32,20 @@ const movieSchema = new mongoose.Schema({
       required: false,
     },
   },
+  notes: {
+    uz: {
+      type: String,
+      required: false,
+    },
+    ru: {
+      type: String,
+      required: false,
+    },
+    en: {
+      type: String,
+      required: false,
+    },
+  },
   description: {
     uz: {
       type: String,
