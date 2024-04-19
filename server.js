@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import userRoutes from "./routes/user.routes.js";
+import movieRoutes from "./routes/movie.routes.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ mongoose
   });
 
 app.use("/users", userRoutes);
+app.use("/movies", movieRoutes)
 
 app.listen(8080, () => {
   console.log("Server is running on port 8080");
