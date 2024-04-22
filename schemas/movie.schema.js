@@ -1,23 +1,6 @@
 import mongoose from "mongoose";
 
 const movieSchema = new mongoose.Schema({
-  isAvailable: {
-    uz: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    ru: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    en: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
   title: {
     uz: {
       type: String,
@@ -116,10 +99,39 @@ const movieSchema = new mongoose.Schema({
       required: false,
     },
   },
-  isNew: {
-    type: Boolean,
-    required: false,
-    default: false,
+  status: {
+    isNew: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    isTrending: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    isAvailable: {
+      uz: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+      ru: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+      en: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+    },
+    type: {
+      type: String,
+      required: false,
+      default: "movie",
+    },
   },
   movie: {
     uz: {
@@ -165,6 +177,11 @@ const movieSchema = new mongoose.Schema({
       },
     },
   },
+  series: {
+    // To be continued...
+  },
+
+  // Trailer
   comments: {
     type: Array,
     required: false,
