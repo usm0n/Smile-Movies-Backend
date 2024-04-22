@@ -177,11 +177,29 @@ const movieSchema = new mongoose.Schema({
       },
     },
   },
-  series: {
-    // To be continued...
+  subtitles: {
+    uz: {
+      type: String,
+      required: false,
+    },
+    ru: {
+      type: String,
+      required: false,
+    },
+    en: {
+      type: String,
+      required: false,
+    },
   },
-
-  // Trailer
+  series: {
+    type: Array,
+    required: false,
+    default: [],
+  },
+  trailer: {
+    type: String,
+    required: false,
+  },
   comments: {
     type: Array,
     required: false,
