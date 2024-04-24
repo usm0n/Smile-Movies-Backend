@@ -3,7 +3,6 @@ import User from "../schemas/user.schema.js";
 import crypto from "crypto";
 import { sendMail } from "../utils/sendMail.js";
 import Movie from "../schemas/movie.schema.js";
-import mongoose from "mongoose";
 
 //get user by properties
 export const getAllUsers = async (req, res) => {
@@ -85,7 +84,7 @@ export const updateUserById = async (req, res) => {
             message: "User not found",
           });
         } else {
-          res.status(200).json(user);
+          res.status(200).json({ message: "User updated successfully" });
         }
       })
       .catch((err) => {
@@ -110,7 +109,7 @@ export const updateUserByEmail = async (req, res) => {
             message: "User not found",
           });
         } else {
-          res.status(200).json(user);
+          res.status(200).json({ message: "User updated successfully" });
         }
       })
       .catch((err) => {
@@ -134,7 +133,7 @@ export const deleteUserById = async (req, res) => {
             message: "User not found",
           });
         } else {
-          res.status(200).json(user);
+          res.status(200).json({ message: "User deleted" });
         }
       })
       .catch((err) => {
@@ -157,7 +156,7 @@ export const deleteUserByEmail = async (req, res) => {
             message: "User not found",
           });
         } else {
-          res.status(200).json(user);
+          res.status(200).json({ message: "User deleted" });
         }
       })
       .catch((err) => {
@@ -193,7 +192,10 @@ export const registerUser = async (req, res) => {
             "Please Verify your account",
             `Your verification code is ${token.token}`
           );
-          res.status(200).json(newUser);
+          res.status(200).json({
+            message: "User registered successfully. Please verify your account",
+            user: newUser,
+          });
         })
         .catch((err) => {
           res.status(500).json({
@@ -229,12 +231,18 @@ export const loginUser = async (req, res) => {
               "Please Verify your account",
               `Your verification code is ${token.token}`
             );
-            res.status(200).json(user);
+            res.status(200).json({
+              message: "Code send to your email, please verify your account",
+              user: user,
+            });
           } else {
-            res.status(200).json(user);
+            res.status(200).json({
+              message: `Code already sent to your email at ${token.createdAt}, please verify your accaunt`,
+              user: user,
+            });
           }
         } else {
-          res.status(200).json(user);
+          res.status(200).json({ message: "Login successful", user: user });
         }
       }
     }
@@ -249,16 +257,20 @@ export const verifyUser = async (req, res) => {
     if (!user) {
       res.status(400).json({ message: "user invalid" });
     } else {
-      const token = await Token.findOne({
-        userId: req.params.id,
-        token: req.params.token,
-      });
-      if (!token) {
-        return res.status(400).json({ message: "invalid code" });
+      if (user.isVerified) {
+        res.status(400).json({ message: "User already verified" });
       } else {
-        await User.findByIdAndUpdate(req.params.id, { isVerified: true });
-        await token.deleteOne(user._id);
-        res.status(200).json({ message: "User verified successfully" });
+        const token = await Token.findOne({
+          userId: req.params.id,
+          token: req.params.token,
+        });
+        if (!token) {
+          return res.status(400).json({ message: "invalid code" });
+        } else {
+          await User.findByIdAndUpdate(req.params.id, { isVerified: true });
+          await token.deleteOne(user._id);
+          res.status(200).json({ message: "User verified successfully" });
+        }
       }
     }
   } catch (error) {
@@ -347,7 +359,6 @@ export const addMovieToFavourites = async (req, res) => {
     res.status(500).json("error: " + error);
   }
 };
-
 export const removeMovieFromFavourites = async (req, res) => {
   const userId = req.params.userId;
   const favMovieId = req.params.favMovieId;
@@ -399,7 +410,6 @@ export const addMovieToWatchLater = async (req, res) => {
     }
   }
 };
-
 export const removeMovieFromWatchLater = async (req, res) => {
   const userId = req.params.userId;
   const watchLaterMovieId = req.params.wlmId;
@@ -420,5 +430,66 @@ export const removeMovieFromWatchLater = async (req, res) => {
     res.status(200).json({
       message: "Movie removed from watch later",
     });
+  }
+};
+
+// give and cancel premium
+
+export const givePremium = async (req, res) => {
+  try {
+    const email = req.params.email;
+
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else {
+      if (!user.isVerified) {
+        res.status(400).json({
+          message: "User is not verified",
+        });
+      } else {
+        if (user.isPremiumUser) {
+          res.status(400).json({
+            message: "User already has premium plan",
+          });
+        } else {
+          user.isPremiumUser = true;
+          await user.save();
+          res.status(200).json({
+            message: "User given premium",
+          });
+        }
+      }
+    }
+  } catch (error) {
+    res.status(500).json("error: " + error);
+  }
+};
+export const cancelPremium = async (req, res) => {
+  try {
+    const email = req.params.email;
+
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else {
+      if (!user.isPremiumUser) {
+        res.status(400).json({
+          message: "User does not have premium plan",
+        });
+      } else {
+        user.isPremiumUser = false;
+        await user.save();
+        res.status(200).json({
+          message: "User cancelled premium",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json("error: " + error);
   }
 };
