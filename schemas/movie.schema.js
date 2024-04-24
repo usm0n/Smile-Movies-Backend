@@ -65,10 +65,12 @@ const movieSchema = new mongoose.Schema({
     like: {
       type: Number,
       required: false,
+      default: 0
     },
     dislike: {
       type: Number,
       required: false,
+      default: 0
     },
   },
   country: {
