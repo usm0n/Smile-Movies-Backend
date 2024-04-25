@@ -19,7 +19,7 @@ export const getAllUsers = async (req, res) => {
       })
       .catch((err) => {
         res.status(500).json({
-          error: err,
+          error: err.message,
         });
       });
   } catch (error) {
@@ -47,7 +47,7 @@ export const getUserById = async (req, res) => {
       });
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -65,12 +65,12 @@ export const getUserByEmail = async (req, res) => {
       })
       .catch((err) => {
         res.status(500).json({
-          error: err,
+          error: err.message,
         });
       });
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -84,12 +84,14 @@ export const updateUserById = async (req, res) => {
             message: "User not found",
           });
         } else {
-          res.status(200).json({ message: "User updated successfully" });
+          res
+            .status(200)
+            .json({ message: "User updated successfully", user: user });
         }
       })
       .catch((err) => {
         res.status(500).json({
-          error: err,
+          error: err.message,
         });
       });
   } catch (error) {
@@ -109,17 +111,19 @@ export const updateUserByEmail = async (req, res) => {
             message: "User not found",
           });
         } else {
-          res.status(200).json({ message: "User updated successfully" });
+          res
+            .status(200)
+            .json({ message: "User updated successfully", user: user });
         }
       })
       .catch((err) => {
         res.status(500).json({
-          error: err,
+          error: err.message,
         });
       });
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -138,12 +142,12 @@ export const deleteUserById = async (req, res) => {
       })
       .catch((err) => {
         res.status(500).json({
-          error: err,
+          error: err.message,
         });
       });
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -161,12 +165,12 @@ export const deleteUserByEmail = async (req, res) => {
       })
       .catch((err) => {
         res.status(500).json({
-          error: err,
+          error: err.message,
         });
       });
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -199,13 +203,13 @@ export const registerUser = async (req, res) => {
         })
         .catch((err) => {
           res.status(500).json({
-            error: "Error at register user. error: " + err,
+            error: err.message,
           });
         });
     }
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -247,7 +251,7 @@ export const loginUser = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json({ message: "Error at login" + error });
+    res.status(500).json({ error: error.message });
   }
 };
 // verify user
@@ -274,7 +278,7 @@ export const verifyUser = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json("Error at verifying user" + error);
+    res.status(500).json({ error: error.message });
   }
 };
 // delete token by userID
@@ -288,7 +292,7 @@ export const deleteVerifyTokenByUserId = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json("Error at deleting token" + error);
+    res.status(500).json({ error: error.message });
   }
 };
 // resend token
@@ -321,11 +325,37 @@ export const resendToken = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json("Error at resending token" + error);
+    res.status(500).json({ error: error.message });
   }
 };
 
 // add to favorites or watch later
+
+export const getFavourites = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else {
+      const movies = await Movie.find({ _id: { $in: user.favourites } });
+      if (!movies) {
+        res.status(404).json({
+          message: "Movies not found",
+        });
+      } else {
+        res.status(200).json({
+          movies: movies,
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const addMovieToFavourites = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -356,80 +386,116 @@ export const addMovieToFavourites = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json("error: " + error);
+    res.status(500).json({ error: error.message });
   }
 };
 export const removeMovieFromFavourites = async (req, res) => {
-  const userId = req.params.userId;
-  const favMovieId = req.params.favMovieId;
-  const user = await User.findById(userId);
-  if (!user) {
-    res.status(404).json({
-      message: "User not found",
-    });
-  } else if (!user.favourites.includes(favMovieId)) {
-    res.status(404).json({
-      message: "Movie not found in favorites",
-    });
-  } else {
-    user.favourites = user.favourites.filter((movie) => movie != favMovieId);
-    await user.save();
-    res.status(200).json({
-      message: "Movie removed from favourites",
-    });
+  try {
+    const userId = req.params.userId;
+    const favMovieId = req.params.favMovieId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else if (!user.favourites.includes(favMovieId)) {
+      res.status(404).json({
+        message: "Movie not found in favorites",
+      });
+    } else {
+      user.favourites = user.favourites.filter((movie) => movie != favMovieId);
+      await user.save();
+      res.status(200).json({
+        message: "Movie removed from favourites",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getWatchLater = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else {
+      const movies = await Movie.find({ _id: { $in: user.watchlater } });
+      if (!movies) {
+        res.status(404).json({
+          message: "Movies not found",
+        });
+      } else {
+        res.status(200).json({
+          movies: movies,
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
 export const addMovieToWatchLater = async (req, res) => {
-  const userId = req.params.userId;
-  const movieId = req.params.movieId;
-  const user = await User.findById(userId);
-
-  if (!user) {
-    res.status(404).json({
-      message: "User not found",
-    });
-  } else {
-    const movie = await Movie.findById(movieId);
-    if (!movie) {
+  try {
+    const userId = req.params.userId;
+    const movieId = req.params.movieId;
+    const user = await User.findById(userId);
+    if (!user) {
       res.status(404).json({
-        message: "Movie not found",
+        message: "User not found",
       });
     } else {
-      if (user.watchlater.includes(movieId)) {
-        res.status(400).json({
-          message: "Movie already saved to watch later",
+      const movie = await Movie.findById(movieId);
+      if (!movie) {
+        res.status(404).json({
+          message: "Movie not found",
         });
       } else {
-        user.watchlater.push(movieId);
-        await user.save();
-        res.status(200).json({
-          message: "Movie added to watch later",
-        });
+        if (user.watchlater.includes(movieId)) {
+          res.status(400).json({
+            message: "Movie already saved to watch later",
+          });
+        } else {
+          user.watchlater.push(movieId);
+          await user.save();
+          res.status(200).json({
+            message: "Movie added to watch later",
+          });
+        }
       }
     }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 export const removeMovieFromWatchLater = async (req, res) => {
-  const userId = req.params.userId;
-  const watchLaterMovieId = req.params.wlmId;
-  const user = await User.findById(userId);
-  if (!user) {
-    res.status(404).json({
-      message: "User not found",
-    });
-  } else if (!user.watchlater.includes(watchLaterMovieId)) {
-    res.status(404).json({
-      message: "Movie not found in watch later",
-    });
-  } else {
-    user.watchlater = user.watchlater.filter(
-      (movie) => movie != watchLaterMovieId
-    );
-    await user.save();
-    res.status(200).json({
-      message: "Movie removed from watch later",
-    });
+  try {
+    const userId = req.params.userId;
+    const watchLaterMovieId = req.params.wlmId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else if (!user.watchlater.includes(watchLaterMovieId)) {
+      res.status(404).json({
+        message: "Movie not found in watch later",
+      });
+    } else {
+      user.watchlater = user.watchlater.filter(
+        (movie) => movie != watchLaterMovieId
+      );
+      await user.save();
+      res.status(200).json({
+        message: "Movie removed from watch later",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -464,7 +530,7 @@ export const givePremium = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json("error: " + error);
+    res.status(500).json({ error: error.message });
   }
 };
 export const cancelPremium = async (req, res) => {
@@ -490,6 +556,6 @@ export const cancelPremium = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json("error: " + error);
+    res.status(500).json({ error: error.message });
   }
 };

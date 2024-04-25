@@ -15,7 +15,7 @@ export const getAllMovies = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      error: error.message,
     });
   }
 };
@@ -32,7 +32,7 @@ export const getMovieById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      error: error.message,
     });
   }
 };
@@ -50,7 +50,7 @@ export const updateMovieById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      error: error.message,
     });
   }
 };
@@ -68,7 +68,7 @@ export const deleteMovieById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      error: error.message,
     });
   }
 };
@@ -86,7 +86,7 @@ export const deleteAllMovies = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      error: error.message,
     });
   }
 };
@@ -99,7 +99,7 @@ export const createMovie = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -138,7 +138,7 @@ export const postComment = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -160,23 +160,7 @@ export const deleteComment = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      error: error,
+      error: error.message,
     });
   }
 };
-
-export const updateComment = async (req, res) => {
-  try {
-    const movieId = req.params.movieId
-    const commentId = req.params.commentId
-
-    const movie = await Movie.findById(movieId)
-    if(!movie){
-      res.status(404).json({message: "Movie not found"})
-    }else{
-      movie.comment
-    }
-  } catch (error) {
-    
-  }
-}

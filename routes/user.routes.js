@@ -7,8 +7,10 @@ import {
   deleteUserById,
   deleteVerifyTokenByUserId,
   getAllUsers,
+  getFavourites,
   getUserByEmail,
   getUserById,
+  getWatchLater,
   givePremium,
   loginUser,
   registerUser,
@@ -40,9 +42,11 @@ router.get("/:id/verify/:token", verifyUser);
 router.delete("/deletetoken/:id", deleteVerifyTokenByUserId);
 router.post("/resendtoken/:id", resendToken);
 
+router.get("/:userId/favourites", getFavourites)
 router.post("/:userId/amtf/:movieId", addMovieToFavourites);
 router.delete("/:userId/rmff/:favMovieId", removeMovieFromFavourites)
 
+router.get("/:userId/watchlater", getWatchLater)
 router.post("/:userId/wlm/:movieId", addMovieToWatchLater);
 router.delete("/:userId/rmwl/:wlmId", removeMovieFromWatchLater)
 
