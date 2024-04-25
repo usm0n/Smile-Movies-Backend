@@ -118,6 +118,8 @@ export const postComment = async (req, res) => {
         firstname: user.firstname,
         lastname: user.lastname,
         comment: req.body.comment,
+        like: 0,
+        dislike: 0
       };
       const movie = await Movie.findById(movieId);
       if (!movie) {
@@ -162,3 +164,19 @@ export const deleteComment = async (req, res) => {
     });
   }
 };
+
+export const updateComment = async (req, res) => {
+  try {
+    const movieId = req.params.movieId
+    const commentId = req.params.commentId
+
+    const movie = await Movie.findById(movieId)
+    if(!movie){
+      res.status(404).json({message: "Movie not found"})
+    }else{
+      movie.comment
+    }
+  } catch (error) {
+    
+  }
+}
