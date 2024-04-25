@@ -45,32 +45,42 @@ const movieSchema = new mongoose.Schema({
   },
   releaseDate: {
     day: {
-      type: Number,
+      type: String,
       required: false,
     },
     month: {
-      type: Number,
+      type: String,
       required: false,
     },
     year: {
-      type: Number,
+      type: String,
       required: false,
     },
   },
-  durability: {
-    type: String,
-    required: false,
+  duration: {
+    hour: {
+      type: String,
+      required: false,
+    },
+    min: {
+      type: String,
+      required: false,
+    },
+    sec: {
+      type: String,
+      required: false,
+    },
   },
   rating: {
     like: {
       type: Number,
       required: false,
-      default: 0
+      default: 0,
     },
     dislike: {
       type: Number,
       required: false,
-      default: 0
+      default: 0,
     },
   },
   country: {
@@ -88,8 +98,18 @@ const movieSchema = new mongoose.Schema({
     },
   },
   credit: {
-    type: String,
-    required: false,
+    uz: {
+      type: String,
+      required: false,
+    },
+    ru: {
+      type: String,
+      required: false,
+    },
+    en: {
+      type: String,
+      required: false,
+    },
   },
   image: {
     portrait: {
