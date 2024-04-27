@@ -82,6 +82,11 @@ const movieSchema = new mongoose.Schema({
       required: false,
       default: 0,
     },
+    imdb: {
+      type: String,
+      required: false,
+      default: "N/A"
+    },
   },
   country: {
     uz: {
@@ -157,46 +162,16 @@ const movieSchema = new mongoose.Schema({
   },
   movie: {
     uz: {
-      "480p": {
-        type: String,
-        required: false,
-      },
-      "720p": {
-        type: String,
-        required: false,
-      },
-      "1080p": {
-        type: String,
-        required: false,
-      },
+      type: String,
+      required: false,
     },
     ru: {
-      "480p": {
-        type: String,
-        required: false,
-      },
-      "720p": {
-        type: String,
-        required: false,
-      },
-      "1080p": {
-        type: String,
-        required: false,
-      },
+      type: String,
+      required: false,
     },
     en: {
-      "480p": {
-        type: String,
-        required: false,
-      },
-      "720p": {
-        type: String,
-        required: false,
-      },
-      "1080p": {
-        type: String,
-        required: false,
-      },
+      type: String,
+      required: false,
     },
   },
   subtitles: {
@@ -221,6 +196,7 @@ const movieSchema = new mongoose.Schema({
   trailer: {
     type: String,
     required: false,
+    default: "",
   },
   comments: {
     type: Array,
