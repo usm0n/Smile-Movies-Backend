@@ -104,6 +104,55 @@ export const createMovie = async (req, res) => {
   }
 };
 
+export const getCommentById = async (req, res) => {
+  const movieId = req.params.movieId
+  const commentId = req.params.commentId;
+
+  try {
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      res.status(404).json({
+        message: "Movie not found",
+      });
+    } else{
+      const comment = movie.comments.find((comment) => comment._id == commentId);
+      if (!comment) {
+        res.status(404).json({
+          message: "Comment not found",
+        });
+      } else {
+        res.status(200).json(comment);
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+}
+
+export const getCommentsByMovieId = async (req, res) => {
+  try {
+    const movieId = req.params.movieId;
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      res.status(404).json({
+        message: "Movie not found",
+      });
+    } else if (!movie.comments.length) {
+      res.status(404).json({
+        message: "Comments not found",
+      });
+    } else {
+      res.status(200).json(movie.comments);
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
 export const postComment = async (req, res) => {
   try {
     const movieId = req.params.movieId;
@@ -119,7 +168,7 @@ export const postComment = async (req, res) => {
         lastname: user.lastname,
         comment: req.body.comment,
         like: 0,
-        dislike: 0
+        dislike: 0,
       };
       const movie = await Movie.findById(movieId);
       if (!movie) {

@@ -5,6 +5,8 @@ import {
   deleteComment,
   deleteMovieById,
   getAllMovies,
+  getCommentById,
+  getCommentsByMovieId,
   getMovieById,
   postComment,
   updateMovieById,
@@ -22,6 +24,8 @@ router.delete("/", deleteAllMovies);
 
 router.post("/", createMovie);
 
+router.get("/:movieId/comments", getCommentsByMovieId)
+router.get("/:movieId/comments/:commentId", getCommentById)
 router.post("/:movieId/commentAs/:userId", postComment);
 router.delete("/:movieId/deleteComment/:commentId", deleteComment);
 
