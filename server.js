@@ -17,8 +17,9 @@ mongoose
   .then(() => {
     console.log("Mongo DB connected successfully");
   })
-  .catch(() => {
+  .catch((err) => {
     console.log("Error connecting to Mongo DB");
+    console.log(err);
   });
 
 app.use("/users", userRoutes);
