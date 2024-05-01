@@ -137,23 +137,6 @@ const movieSchema = new mongoose.Schema({
       required: false,
       default: false,
     },
-    isAvailable: {
-      uz: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      ru: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      en: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-    },
     type: {
       type: String,
       required: false,
