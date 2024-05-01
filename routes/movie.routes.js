@@ -26,7 +26,7 @@ router.post("/", createMovie);
 
 router.get("/:movieId/comments", getCommentsByMovieId)
 router.get("/:movieId/comments/:commentId", getCommentById)
-router.post("/:movieId/commentAs/:userId", postComment);
+router.post("/:movieId/postComment/", postComment);
 router.delete("/:movieId/deleteComment/:commentId", deleteComment);
 
 export default router;

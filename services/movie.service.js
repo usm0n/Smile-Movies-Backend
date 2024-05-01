@@ -105,7 +105,7 @@ export const createMovie = async (req, res) => {
 };
 
 export const getCommentById = async (req, res) => {
-  const movieId = req.params.movieId
+  const movieId = req.params.movieId;
   const commentId = req.params.commentId;
 
   try {
@@ -114,8 +114,10 @@ export const getCommentById = async (req, res) => {
       res.status(404).json({
         message: "Movie not found",
       });
-    } else{
-      const comment = movie.comments.find((comment) => comment._id == commentId);
+    } else {
+      const comment = movie.comments.find(
+        (comment) => comment._id == commentId
+      );
       if (!comment) {
         res.status(404).json({
           message: "Comment not found",
@@ -129,7 +131,7 @@ export const getCommentById = async (req, res) => {
       error: error.message,
     });
   }
-}
+};
 
 export const getCommentsByMovieId = async (req, res) => {
   try {
@@ -156,34 +158,31 @@ export const getCommentsByMovieId = async (req, res) => {
 export const postComment = async (req, res) => {
   try {
     const movieId = req.params.movieId;
-    const userId = req.params.userId;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+
+    const comment = {
+      _id: new mongoose.Types.ObjectId(),
+      firstname: req.body.firstname,
+      comment: req.body.comment,
+      like: 0,
+      dislike: 0,
+    };
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      res.status(404).json({
+        message: "Movie not found",
+      });
+    } else if (!comment.comment.trim() || !comment.comment) {
+      res.status(404).json({
+        message: "Comment cannot be empty",
+      });
     } else {
-      const comment = {
-        _id: new mongoose.Types.ObjectId(),
-        userId: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        comment: req.body.comment,
-        like: 0,
-        dislike: 0,
-      };
-      const movie = await Movie.findById(movieId);
-      if (!movie) {
-        res.status(404).json({
-          message: "Movie not found",
-        });
-      } else if (!comment.comment.trim() || !comment.comment) {
-        res.status(404).json({
-          message: "Comment cannot be empty",
-        });
-      } else {
-        movie.comments.push(comment);
-        await movie.save();
-        res.status(201).json(movie);
-      }
+      movie.comments.push(comment);
+      await movie.save();
+      res.status(201).json({
+        message: "Comment posted successfully",
+        movie: movie,
+        comment: comment,
+      });
     }
   } catch (error) {
     res.status(500).json({

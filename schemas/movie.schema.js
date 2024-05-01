@@ -85,7 +85,7 @@ const movieSchema = new mongoose.Schema({
     imdb: {
       type: String,
       required: false,
-      default: "N/A"
+      default: "N/A",
     },
   },
   country: {
@@ -161,20 +161,6 @@ const movieSchema = new mongoose.Schema({
     },
   },
   movie: {
-    uz: {
-      type: String,
-      required: false,
-    },
-    ru: {
-      type: String,
-      required: false,
-    },
-    en: {
-      type: String,
-      required: false,
-    },
-  },
-  subtitles: {
     uz: {
       type: String,
       required: false,
