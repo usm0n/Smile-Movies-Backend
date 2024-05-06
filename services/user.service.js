@@ -356,6 +356,31 @@ export const getFavourites = async (req, res) => {
   }
 };
 
+export const isInFavourites = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const movieId = req.params.movieId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else {
+      if (user.favourites.includes(movieId)) {
+        res.status(200).json({
+          message: "Movie in favourites",
+        });
+      } else {
+        res.status(404).json({
+          message: "Movie not in favourites",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const addMovieToFavourites = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -433,6 +458,29 @@ export const getWatchLater = async (req, res) => {
           movies: movies,
         });
       }
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const isInWatchLater = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const movieId = req.params.movieId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found",
+      });
+    } else if (!user.watchlater.includes(movieId)) {
+      res.status(404).json({
+        message: "Movie not found in watch later",
+      });
+    } else {
+      res.status(200).json({
+        message: "Movie found in watch later",
+      });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });

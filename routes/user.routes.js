@@ -12,6 +12,8 @@ import {
   getUserById,
   getWatchLater,
   givePremium,
+  isInFavourites,
+  isInWatchLater,
   loginUser,
   registerUser,
   removeMovieFromFavourites,
@@ -42,13 +44,15 @@ router.get("/:id/verify/:token", verifyUser);
 router.delete("/deletetoken/:id", deleteVerifyTokenByUserId);
 router.post("/resendtoken/:id", resendToken);
 
-router.get("/:userId/favourites", getFavourites)
+router.get("/:userId/favourites", getFavourites);
+router.get("/:userId/isInFavourites/:movieId", isInFavourites);
 router.post("/:userId/amtf/:movieId", addMovieToFavourites);
-router.delete("/:userId/rmff/:favMovieId", removeMovieFromFavourites)
+router.delete("/:userId/rmff/:favMovieId", removeMovieFromFavourites);
 
-router.get("/:userId/watchlater", getWatchLater)
+router.get("/:userId/watchlater", getWatchLater);
+router.get("/:userId/isInWatchLater/:movieId", isInWatchLater);
 router.post("/:userId/wlm/:movieId", addMovieToWatchLater);
-router.delete("/:userId/rmwl/:wlmId", removeMovieFromWatchLater)
+router.delete("/:userId/rmwl/:wlmId", removeMovieFromWatchLater);
 
 router.post("/givepremium/:email", givePremium);
 router.post("/cancelpremium/:email", cancelPremium);
