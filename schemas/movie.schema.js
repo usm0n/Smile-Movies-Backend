@@ -66,10 +66,6 @@ const movieSchema = new mongoose.Schema({
       type: String,
       required: false,
     },
-    sec: {
-      type: String,
-      required: false,
-    },
   },
   rating: {
     like: {
@@ -144,23 +140,8 @@ const movieSchema = new mongoose.Schema({
     },
   },
   movie: {
-    uz: {
-      type: String,
-      required: false,
-    },
-    ru: {
-      type: String,
-      required: false,
-    },
-    en: {
-      type: String,
-      required: false,
-    },
-  },
-  series: {
-    type: Array,
+    type: String,
     required: false,
-    default: [],
   },
   trailer: {
     type: String,
@@ -172,7 +153,7 @@ const movieSchema = new mongoose.Schema({
     required: false,
     default: [],
   },
-})
+});
 
 const Movie = mongoose.model("Movie", movieSchema);
 export default Movie;

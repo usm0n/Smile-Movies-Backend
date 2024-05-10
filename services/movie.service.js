@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import Movie from "../schemas/movie.schema.js";
-import User from "../schemas/user.schema.js";
 
 export const getAllMovies = async (req, res) => {
   try {
@@ -132,7 +131,6 @@ export const getCommentById = async (req, res) => {
     });
   }
 };
-
 export const getCommentsByMovieId = async (req, res) => {
   try {
     const movieId = req.params.movieId;
@@ -154,7 +152,6 @@ export const getCommentsByMovieId = async (req, res) => {
     });
   }
 };
-
 export const postComment = async (req, res) => {
   try {
     const movieId = req.params.movieId;
