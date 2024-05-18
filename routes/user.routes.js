@@ -3,6 +3,7 @@ import {
   addMovieToFavourites,
   addMovieToWatchLater,
   cancelPremium,
+  deleteAllUsers,
   deleteUserByEmail,
   deleteUserById,
   deleteVerifyTokenByUserId,
@@ -35,6 +36,7 @@ router.put("/email/:email", updateUserByEmail);
 
 router.delete("/id/:id", deleteUserById);
 router.delete("/email/:email", deleteUserByEmail);
+router.delete("/", deleteAllUsers);
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);

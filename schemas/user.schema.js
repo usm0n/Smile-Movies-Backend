@@ -17,16 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phone: {
-    type: String,
-    required: false,
-  },
   isPremiumUser: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  isOwner: {
     type: Boolean,
     required: false,
     default: false,
@@ -60,11 +51,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     required: false,
     default: false,
-  },
-  defaultLanguage: {
-    type: String,
-    required: false,
-    default: "uz",
   },
   notifications: {
     type: Boolean,

@@ -140,8 +140,18 @@ const movieSchema = new mongoose.Schema({
     },
   },
   movie: {
-    type: String,
-    required: false,
+    uz: {
+      type: String,
+      required: false,
+    },
+    ru: {
+      type: String,
+      required: false,
+    },
+    en: {
+      type: String,
+      required: false,
+    },
   },
   trailer: {
     type: String,
