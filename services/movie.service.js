@@ -158,6 +158,7 @@ export const postComment = async (req, res) => {
 
     const comment = {
       _id: new mongoose.Types.ObjectId(),
+      userId: req.body.userId,
       firstname: req.body.firstname,
       comment: req.body.comment,
       like: 0,
