@@ -57,6 +57,16 @@ const userSchema = new mongoose.Schema({
     required: false,
     default: true,
   },
+  createdAt: {
+    type: String,
+    required: false,
+    default: `${new Date().getDate()}.${new Date().getMonth()}.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
+  },
+  lastLogin: {
+    type: String,
+    required: false,
+    default: `${new Date().getDate()}.${new Date().getMonth()}.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
+  },
 });
 
 const User = mongoose.model("User", userSchema);

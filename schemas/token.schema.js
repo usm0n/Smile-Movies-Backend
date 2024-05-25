@@ -13,8 +13,8 @@ const tokenSchema = new mongoose.Schema({
     unique: true,
   },
   createdAt: {
-    type: Date,
-    default: Date.now,
+    type: String,
+    default: `${new Date().getDate()}.${new Date().getMonth()}.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
   },
 });
 
