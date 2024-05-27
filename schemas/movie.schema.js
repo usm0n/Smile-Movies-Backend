@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const commentSchema = new mongoose.Schema(
+  {
+    comment: String,
+    firstname: String,
+    isAdmin: { type: Boolean, default: false },
+    like: { type: Number, default: 0 },
+    dislike: { type: Number, default: 0 },
+  },
+  { _id: true }
+);
+
 const movieSchema = new mongoose.Schema({
   title: {
     uz: {
@@ -158,11 +169,7 @@ const movieSchema = new mongoose.Schema({
     required: false,
     default: "",
   },
-  comments: {
-    type: Array,
-    required: false,
-    default: [],
-  },
+  comments: [commentSchema],
 });
 
 const Movie = mongoose.model("Movie", movieSchema);

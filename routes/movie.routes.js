@@ -9,6 +9,7 @@ import {
   getCommentsByMovieId,
   getMovieById,
   postComment,
+  updateComment,
   updateMovieById,
 } from "../services/movie.service.js";
 
@@ -28,5 +29,6 @@ router.get("/:movieId/comments", getCommentsByMovieId)
 router.get("/:movieId/comments/:commentId", getCommentById)
 router.post("/:movieId/postComment", postComment);
 router.delete("/:movieId/deleteComment/:commentId", deleteComment);
+router.put("/:movieId/updateComment/:commentId", updateComment);
 
 export default router;

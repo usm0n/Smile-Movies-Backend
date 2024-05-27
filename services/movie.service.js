@@ -210,3 +210,35 @@ export const deleteComment = async (req, res) => {
     });
   }
 };
+export const updateComment = async (req, res) => {
+  try {
+    const movieId = req.params.movieId;
+    const commentId = req.params.commentId;
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      res.status(404).json({
+        message: "Movie not found",
+      });
+    } else {
+      const comment = movie.comments.find(
+        (comment) => comment._id == commentId
+      );
+      if (!comment) {
+        res.status(404).json({
+          message: "Comment not found",
+        });
+      } else {
+        comment.firstname = req.body.firstname;
+        comment.comment = req.body.comment;
+        comment.like = req.body.like;
+        comment.dislike = req.body.dislike;
+        await movie.save();
+        res.status(201).json({ message: "Comment updated successfully" });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
