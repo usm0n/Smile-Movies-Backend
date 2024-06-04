@@ -149,6 +149,11 @@ const movieSchema = new mongoose.Schema({
       required: false,
       default: "movie",
     },
+    isAvailable: {
+      type: Boolean,
+      required: false,
+      default: true,
+    }
   },
   movie: {
     uz: {
