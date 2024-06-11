@@ -1,7 +1,5 @@
-import Token from "../schemas/token.schema.js";
 import crypto from "crypto";
 import { sendMail } from "../utils/sendMail.js";
-import Movie from "../schemas/movie.schema.js";
 import Datastore from "nedb";
 import { movies } from "./movie.service.js";
 

@@ -11,9 +11,7 @@ export const getAllMovies = (req, res) => {
           message: "Movies not found",
         });
       } else {
-        res.status(200).json({
-          movies: movies,
-        });
+        res.status(200).json(movies);
       }
     });
   } catch (error) {
@@ -30,9 +28,7 @@ export const getMovieById = (req, res) => {
           message: "Movie not found",
         });
       } else {
-        res.status(200).json({
-          movie: movie,
-        });
+        res.status(200).json(movie);
       }
     });
   } catch (error) {
@@ -50,9 +46,7 @@ export const updateMovieById = (req, res) => {
           message: "Movie not found",
         });
       } else {
-        res.status(200).json({
-          movie: movie,
-        });
+        res.status(200).json(movie);
       }
     });
   } catch (error) {
@@ -69,9 +63,7 @@ export const deleteMovieById = (req, res) => {
           message: "Movie not found",
         });
       } else {
-        res.status(200).json({
-          movie: movie,
-        });
+        res.status(200).json(movie);
       }
     });
   } catch (error) {
@@ -87,9 +79,7 @@ export const deleteAllMovies = (req, res) => {
           message: "Movies not found",
         });
       } else {
-        res.status(200).json({
-          movie: movie,
-        });
+        res.status(200).json({ message: "All Movies are deleted" });
       }
     });
   } catch (error) {
@@ -163,9 +153,7 @@ export const createMovie = (req, res) => {
           message: "Movie not found",
         });
       } else {
-        res.status(200).json({
-          movie: movie,
-        });
+        res.status(201).json(movie);
       }
     });
   } catch (error) {
@@ -182,9 +170,7 @@ export const getCommentsByMovieId = (req, res) => {
           message: "Movie not found",
         });
       } else {
-        res.status(200).json({
-          comments: movie.comments,
-        });
+        res.status(200).json(movie.comments);
       }
     });
   } catch (error) {
@@ -202,9 +188,7 @@ export const getCommentById = (req, res) => {
           message: "Movie not found",
         });
       } else {
-        res.status(200).json({
-          comment: movie.comments[commentId],
-        });
+        res.status(200).json(movie.comments[commentId]);
       }
     });
   } catch (error) {
@@ -225,9 +209,7 @@ export const postComment = (req, res) => {
             message: "Movie not found",
           });
         } else {
-          res.status(200).json({
-            movie: movie,
-          });
+          res.status(200).json(movie);
         }
       }
     );
@@ -249,9 +231,7 @@ export const deleteComment = (req, res) => {
             message: "Movie not found",
           });
         } else {
-          res.status(200).json({
-            movie: movie,
-          });
+          res.status(200).json(movie);
         }
       }
     );
@@ -274,9 +254,7 @@ export const updateComment = (req, res) => {
             message: "Movie not found",
           });
         } else {
-          res.status(200).json({
-            movie: movie,
-          });
+          res.status(200).json(movie);
         }
       }
     );
