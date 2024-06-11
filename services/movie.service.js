@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import Movie from "../schemas/movie.schema.js";
+import Datastore from "nedb";
+
+export const movies = new Datastore({ filename: "./data/movies.json" });
+movies.loadDatabase((err) => console.log(err));
 
 export const getAllMovies = async (req, res) => {
   try {
