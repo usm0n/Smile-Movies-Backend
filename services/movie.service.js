@@ -6,7 +6,12 @@ movies.loadDatabase((err) => console.log(err));
 export const getAllMovies = (req, res) => {
   try {
     movies.find({}, (err, movies) => {
-      if (!movies) {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
+      if (!movies.length) {
         res.status(404).json({
           message: "Movies not found",
         });
@@ -23,6 +28,11 @@ export const getMovieById = (req, res) => {
   try {
     const id = req.params.id;
     movies.findOne({ _id: id }, (err, movie) => {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
       if (!movie) {
         res.status(404).json({
           message: "Movie not found",
@@ -41,12 +51,17 @@ export const updateMovieById = (req, res) => {
     const id = req.params.id;
     const movie = req.body;
     movies.update({ _id: id }, { $set: movie }, (err, movie) => {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
       if (!movie) {
         res.status(404).json({
           message: "Movie not found",
         });
       } else {
-        res.status(200).json(movie);
+        res.status(200).json({ message: "Movie updated" });
       }
     });
   } catch (error) {
@@ -58,12 +73,17 @@ export const deleteMovieById = (req, res) => {
   try {
     const id = req.params.id;
     movies.remove({ _id: id }, (err, movie) => {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
       if (!movie) {
         res.status(404).json({
           message: "Movie not found",
         });
       } else {
-        res.status(200).json(movie);
+        res.status(200).json({ message: "Movie deleted" });
       }
     });
   } catch (error) {
@@ -74,6 +94,11 @@ export const deleteMovieById = (req, res) => {
 export const deleteAllMovies = (req, res) => {
   try {
     movies.remove({}, (err, movie) => {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
       if (!movie) {
         res.status(404).json({
           message: "Movies not found",
@@ -148,6 +173,11 @@ export const createMovie = (req, res) => {
       comments: [],
     };
     movies.insert(movie, (err, movie) => {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
       if (!movie) {
         res.status(404).json({
           message: "Movie not found",
@@ -165,6 +195,11 @@ export const getCommentsByMovieId = (req, res) => {
   try {
     const id = req.params.movieId;
     movies.findOne({ _id: id }, (err, movie) => {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
       if (!movie) {
         res.status(404).json({
           message: "Movie not found",
@@ -183,12 +218,19 @@ export const getCommentById = (req, res) => {
     const movieId = req.params.movieId;
     const commentId = req.params.commentId;
     movies.findOne({ _id: movieId }, (err, movie) => {
+      if (err) {
+        return res.status(500).json({
+          message: err.message,
+        });
+      }
       if (!movie) {
         res.status(404).json({
           message: "Movie not found",
         });
       } else {
-        res.status(200).json(movie.comments[commentId]);
+        res
+          .status(200)
+          .json(movie.comments.find((comment) => comment._id === commentId));
       }
     });
   } catch (error) {
@@ -199,17 +241,27 @@ export const getCommentById = (req, res) => {
 export const postComment = (req, res) => {
   try {
     const movieId = req.params.movieId;
-    const comment = req.body;
+    const comment = {
+      _id: Date.now().toString(),
+      firstname: req.body.firstname,
+      comment: req.body.comment,
+      isAdmin: req.body.isAdmin,
+    };
     movies.update(
       { _id: movieId },
       { $push: { comments: comment } },
       (err, movie) => {
+        if (err) {
+          return res.status(500).json({
+            message: err.message,
+          });
+        }
         if (!movie) {
           res.status(404).json({
             message: "Movie not found",
           });
         } else {
-          res.status(200).json(movie);
+          res.status(200).json({ message: "Comment posted successfully" });
         }
       }
     );
@@ -226,12 +278,19 @@ export const deleteComment = (req, res) => {
       { _id: movieId },
       { $pull: { comments: { _id: commentId } } },
       (err, movie) => {
+        if (err) {
+          return res.status(500).json({
+            message: err.message,
+          });
+        }
         if (!movie) {
           res.status(404).json({
             message: "Movie not found",
           });
         } else {
-          res.status(200).json(movie);
+          res.status(200).json({
+            message: "Comment deleted successfully",
+          });
         }
       }
     );
@@ -244,20 +303,41 @@ export const updateComment = (req, res) => {
   try {
     const movieId = req.params.movieId;
     const commentId = req.params.commentId;
-    const comment = req.body;
-    movies.update(
-      { _id: movieId, "comments._id": commentId },
-      { $set: { "comments.$": comment } },
-      (err, movie) => {
-        if (!movie) {
-          res.status(404).json({
-            message: "Movie not found",
-          });
-        } else {
-          res.status(200).json(movie);
-        }
+    const { firstname, comment, isAdmin } = req.body;
+
+    // Find the document containing the comment
+    movies.findOne({ _id: movieId }, (err, movie) => {
+      if (err) {
+        return res.status(500).json({ message: err.message });
       }
-    );
+      if (!movie) {
+        return res.status(404).json({ message: "Movie not found" });
+      }
+
+      // Find the comment in the movie's comments array
+      const commentValue = movie.comments.find((c) => c._id === commentId);
+      if (!commentValue) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+
+      // Update the fields in the comment
+      if (firstname !== undefined) commentValue.firstname = firstname;
+      if (comment !== undefined) commentValue.comment = comment;
+      if (isAdmin !== undefined) commentValue.isAdmin = isAdmin;
+
+      // Update the movie document in the database
+      movies.update(
+        { _id: movieId },
+        { $set: { comments: movie.comments } },
+        {},
+        (err, numReplaced) => {
+          if (err) {
+            return res.status(500).json({ message: err.message });
+          }
+          res.status(200).json({ message: "Comment updated successfully" });
+        }
+      );
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

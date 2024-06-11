@@ -32,7 +32,7 @@ export const getAllUsers = async (req, res) => {
 };
 export const getUserById = async (req, res) => {
   try {
-    users.find({ _id: req.params.id }, (err, user) => {
+    users.findOne({ _id: req.params.id }, (err, user) => {
       if (err) {
         res.status(500).json({
           error: err.message,
@@ -53,7 +53,7 @@ export const getUserById = async (req, res) => {
 };
 export const getUserByEmail = async (req, res) => {
   try {
-    users.find({ email: req.params.email }, (err, user) => {
+    users.findOne({ email: req.params.email }, (err, user) => {
       if (err) {
         res.status(500).json({
           error: err.message,
@@ -75,7 +75,7 @@ export const getUserByEmail = async (req, res) => {
 // update user by properties
 export const updateUserById = async (req, res) => {
   try {
-    users.update({ _id: req.params.id }, req.body, (err, user) => {
+    users.update({ _id: req.params.id }, { $set: req.body }, (err, user) => {
       if (err) {
         res.status(500).json({
           error: err.message,
@@ -98,7 +98,35 @@ export const updateUserById = async (req, res) => {
 };
 export const updateUserByEmail = async (req, res) => {
   try {
-    users.update({ email: req.params.email }, req.body, (err, user) => {
+    users.update(
+      { email: req.params.email },
+      { $set: req.body },
+      (err, user) => {
+        if (err) {
+          res.status(500).json({
+            error: err.message,
+          });
+        } else if (!user) {
+          res.status(404).json({
+            message: "User not found",
+          });
+        } else {
+          res
+            .status(200)
+            .json({ message: "User updated successfully", user: user });
+        }
+      }
+    );
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+// delete user by properties
+export const deleteUserById = async (req, res) => {
+  try {
+    users.remove({ _id: req.params.id }, (err, user) => {
       if (err) {
         res.status(500).json({
           error: err.message,
@@ -110,7 +138,7 @@ export const updateUserByEmail = async (req, res) => {
       } else {
         res
           .status(200)
-          .json({ message: "User updated successfully", user: user });
+          .json({ message: "User deleted successfully", user: user });
       }
     });
   } catch (error) {
@@ -119,18 +147,9 @@ export const updateUserByEmail = async (req, res) => {
     });
   }
 };
-// delete user by properties
-export const deleteUserById = async (req, res) => {
-  try {
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
-  }
-};
 export const deleteUserByEmail = async (req, res) => {
   try {
-    users.remove({ _id: req.params.id }, (err, user) => {
+    users.remove({ email: req.params.email }, (err, user) => {
       if (err) {
         res.status(500).json({
           error: err.message,
@@ -163,7 +182,7 @@ export const deleteAllUsers = async (req, res) => {
           message: "Users not found",
         });
       } else {
-        res.status(200).json(user);
+        res.status(200).json({ message: "Users deleted successfully" });
       }
     });
   } catch (error) {
@@ -191,11 +210,11 @@ export const registerUser = async (req, res) => {
       createdAt: `${new Date().getDate()}.${new Date().getMonth()}.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
       lastLogin: `${new Date().getDate()}.${new Date().getMonth()}.${new Date().getFullYear()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`,
     };
-    users.findOne({ email: req.params.email }, (err, user) => {
+    users.findOne({ email: req.body.email }, (err, user) => {
       if (err) {
-        return res.json(err);
+        return res.status(500).json(err);
       } else if (user) {
-        return res.json("User already exists");
+        return res.status(409).json({ message: "User already exists" });
       } else {
         users.insert(userSchema, (err, newUser) => {
           tokens.insert(
@@ -212,9 +231,13 @@ export const registerUser = async (req, res) => {
             }
           );
           if (err) {
-            return res.json(err);
+            return res.status(500).json(err);
           } else {
-            res.json(newUser);
+            res.json({
+              message:
+                "User registered successfully. Please verify your account",
+              user: newUser,
+            });
           }
         });
       }
@@ -292,7 +315,7 @@ export const verifyUser = async (req, res) => {
               if (!token) {
                 return res.status(400).json({ message: "invalid code" });
               } else {
-                users.update({ _id: req.params.id }, { isVerified: true });
+                users.update({ _id: user._id }, { $set: { isVerified: true } });
                 tokens.remove({ userId: user._id });
                 res.status(200).json({ message: "User verified successfully" });
               }
@@ -332,9 +355,9 @@ export const resendToken = async (req, res) => {
         } else {
           tokens.findOne({ userId: id }, (err, isTokenExist) => {
             if (isTokenExist) {
-              tokens.findOne({ userId: id });
+              tokens.remove({ userId: id });
             }
-            tokens.findOne(
+            tokens.insert(
               {
                 userId: user._id,
                 token: crypto.randomBytes(3).toString("hex").toUpperCase(),
@@ -516,6 +539,42 @@ export const removeMovieFromWatchLater = (req, res) => {
             message: "Movie removed from watch later",
           });
         }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getAllTokens = (req, res) => {
+  try {
+    tokens.find({}, (err, tokens) => {
+      if (!tokens.length) {
+        res.status(404).json({
+          message: "Tokens not found",
+        });
+      } else {
+        res.status(200).json({
+          tokens: tokens,
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteAllTokens = (req, res) => {
+  try {
+    tokens.remove({}, (err, tokens) => {
+      if (!tokens) {
+        res.status(404).json({
+          message: "Tokens not found",
+        });
+      } else {
+        res.status(200).json({
+          message: "Tokens deleted successfully",
+        });
       }
     });
   } catch (error) {

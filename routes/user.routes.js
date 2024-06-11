@@ -2,10 +2,12 @@ import { Router } from "express";
 import {
   addMovieToFavourites,
   addMovieToWatchLater,
+  deleteAllTokens,
   deleteAllUsers,
   deleteUserByEmail,
   deleteUserById,
   deleteVerifyTokenByUserId,
+  getAllTokens,
   getAllUsers,
   getFavourites,
   getUserByEmail,
@@ -49,5 +51,8 @@ router.delete("/:userId/rmff/:movieId", removeMovieFromFavourites);
 router.get("/:userId/watchlater", getWatchLater);
 router.post("/:userId/wlm/:movieId", addMovieToWatchLater);
 router.delete("/:userId/rmwl/:wlmId", removeMovieFromWatchLater);
+
+router.get("/tokens", getAllTokens);
+router.delete("/tokens", deleteAllTokens);
 
 export default router;
