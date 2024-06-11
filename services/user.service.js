@@ -474,7 +474,7 @@ export const getWatchLater = async (req, res) => {
           message: "User not found",
         });
       } else {
-        movies.find({ _id: { $in: user.watchLater } }, (err, movies) => {
+        movies.find({ _id: { $in: user.watchlater } }, (err, movies) => {
           if (!movies) {
             res.status(404).json({
               message: "Movies not found",
@@ -502,12 +502,12 @@ export const addMovieToWatchLater = async (req, res) => {
           message: "User not found",
         });
       } else {
-        if (user.watchLater.includes(movieId)) {
+        if (user.watchlater.includes(movieId)) {
           res.status(400).json({
             message: "Movie already in watch later",
           });
         } else {
-          users.update({ _id: userId }, { $push: { watchLater: movieId } });
+          users.update({ _id: userId }, { $push: { watchlater: movieId } });
           res.status(200).json({
             message: "Movie added to watch later",
           });
@@ -522,19 +522,19 @@ export const addMovieToWatchLater = async (req, res) => {
 export const removeMovieFromWatchLater = (req, res) => {
   try {
     const userId = req.params.userId;
-    const movieId = req.params.movieId;
+    const movieId = req.params.wlmId;
     users.findOne({ _id: userId }, (err, user) => {
       if (!user) {
         res.status(404).json({
           message: "User not found",
         });
       } else {
-        if (!user.watchLater.includes(movieId)) {
+        if (!user.watchlater.includes(movieId)) {
           res.status(400).json({
             message: "Movie not in watch later",
           });
         } else {
-          users.update({ _id: userId }, { $pull: { watchLater: movieId } });
+          users.update({ _id: userId }, { $pull: { watchlater: movieId } });
           res.status(200).json({
             message: "Movie removed from watch later",
           });
