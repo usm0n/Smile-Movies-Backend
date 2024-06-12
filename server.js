@@ -3,17 +3,19 @@ import cors from "cors";
 import mongoose from "mongoose";
 import userRoutes from "./routes/user.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
+import apiKeyMiddleware from "./utils/apiKeyMiddleware.js";
+import "dotenv/config";
 
 const app = express();
+const MONGODB_KEY = process.env.MONGODB_KEY;
+const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 mongoose
-  .connect(
-    "mongodb+srv://usmondev:smilemovieusmonpassword@cluster0.3zs9zzd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(MONGODB_KEY)
   .then(() => {
     console.log("Mongo DB connected successfully");
   })
@@ -21,10 +23,10 @@ mongoose
     console.log("Error connecting to Mongo DB");
     console.log(err);
   });
-
+app.use(apiKeyMiddleware);
 app.use("/users", userRoutes);
-app.use("/movies", movieRoutes)
+app.use("/movies", movieRoutes);
 
-app.listen(8080, () => {
-  console.log("Server is running on port 8080");
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
