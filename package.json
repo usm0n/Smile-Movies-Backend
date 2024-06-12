@@ -1,0 +1,29 @@
+{
+  "name": "smile-movie-backend",
+  "version": "1.0.0",
+  "description": "this is backend of smile-movie-project",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Forge-Team/Smile-Movies-Project.git"
+  },
+  "author": "Usmon (Forge Team)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Forge-Team/Smile-Movies-Project/issues"
+  },
+  "homepage": "https://github.com/Forge-Team/Smile-Movies-Project#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.2",
+    "nodemailer": "^6.9.13",
+    "nodemon": "^3.1.0"
+  }
+}
