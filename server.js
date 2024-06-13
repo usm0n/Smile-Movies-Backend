@@ -30,7 +30,6 @@ mongoose
     console.log(err);
   });
 app.use(apiKeyMiddleware);
-app.use(express.static("images"));
 app.use("/users", userRoutes);
 app.use("/movies", movieRoutes);
 
