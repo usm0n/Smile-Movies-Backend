@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.engine(".hbs", engine({ extname: ".hbs" }));
 app.set("view engine", ".hbs");
 app.set("views", "./views");
-app.use(express.static("public"))
+app.use(express.static("public"));
 
 mongoose
   .connect(MONGODB_KEY)
@@ -29,7 +29,7 @@ mongoose
     console.log("Error connecting to Mongo DB");
     console.log(err);
   });
-app.use(apiKeyMiddleware);
+app.use("/*", apiKeyMiddleware);
 app.use("/users", userRoutes);
 app.use("/movies", movieRoutes);
 
