@@ -29,21 +29,9 @@ mongoose
     console.log("Error connecting to Mongo DB");
     console.log(err);
   });
-app.use((req, res) => {
-  try {
-    const apiKey = req.header("apiKey");
-    const validApiKey = process.env.API_KEY;
-
-    if (apiKey && apiKey === validApiKey) {
-      app.use("/users", userRoutes);
-      app.use("/movies", movieRoutes);
-    } else {
-      res.render("forbidden.hbs");
-    }
-  } catch (error) {
-    console.log(error);
-  }
-});
+app.use(apiKeyMiddleware);
+app.use("/users", userRoutes);
+app.use("/movies", movieRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
