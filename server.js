@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import userRoutes from "./routes/user.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
 import apiKeyMiddleware from "./utils/apiKeyMiddleware.js";
+import { engine } from "express-handlebars";
 import "dotenv/config";
 
 const app = express();
@@ -13,6 +14,11 @@ const PORT = process.env.PORT;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.engine(".hbs", engine({ extname: ".hbs" }));
+app.set("view engine", ".hbs");
+app.set("views", "./views");
+app.use(express.static("public"))
 
 mongoose
   .connect(MONGODB_KEY)
@@ -24,6 +30,7 @@ mongoose
     console.log(err);
   });
 app.use(apiKeyMiddleware);
+app.use(express.static("images"));
 app.use("/users", userRoutes);
 app.use("/movies", movieRoutes);
 
