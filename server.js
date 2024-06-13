@@ -29,7 +29,7 @@ mongoose
     console.log("Error connecting to Mongo DB");
     console.log(err);
   });
-app.use("/*", apiKeyMiddleware);
+app.use(apiKeyMiddleware);
 app.use("/users", userRoutes);
 app.use("/movies", movieRoutes);
 
