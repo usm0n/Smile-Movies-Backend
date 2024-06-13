@@ -8,7 +8,7 @@ function apiKeyMiddleware(req, res, next) {
     if (apiKey && apiKey === validApiKey) {
       next();
     } else {
-      res.render("./forbidden.hbs");
+      res.render("forbidden.hbs");
     }
   } catch (error) {
     console.log(error);
