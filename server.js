@@ -12,13 +12,8 @@ const MONGODB_KEY = process.env.MONGODB_KEY;
 const PORT = process.env.PORT;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.engine(".hbs", engine({ extname: ".hbs" }));
-app.set("view engine", ".hbs");
-app.set("views", "./views");
-app.use(express.static("public"));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 mongoose
   .connect(MONGODB_KEY)
