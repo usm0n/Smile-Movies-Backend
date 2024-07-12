@@ -6,6 +6,7 @@ import movieRoutes from "./routes/movie.routes.js";
 import apiKeyMiddleware from "./utils/apiKeyMiddleware.js";
 import { engine } from "express-handlebars";
 import "dotenv/config";
+import { sendMail } from "./utils/sendMail.js";
 
 const app = express();
 const MONGODB_KEY = process.env.MONGODB_KEY;
