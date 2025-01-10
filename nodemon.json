@@ -1,10 +1,5 @@
 {
-    "execMap": {
-        "js": "node --harmony"
-    },
-    "ignore": [
-        "data",
-        ".git",
-        "node_modules"
-    ]
+  "watch": ["src"],
+  "ext": ".ts,.js",
+  "exec": "ts-node ./src/index.ts"
 }

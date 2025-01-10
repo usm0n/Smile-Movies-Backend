@@ -1,6 +1,7 @@
 import "dotenv/config";
+import { NextFunction, Request, Response } from "express";
 
-function apiKeyMiddleware(req, res, next) {
+function apiKeyMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
     const apiKey = req.header("apiKey");
     const validApiKey = process.env.API_KEY;

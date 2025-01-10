@@ -8,13 +8,9 @@ import {
   deleteUserById,
   deleteVerifyTokenByUserId,
   getAllUsers,
-  getFavourites,
   getUserByEmail,
   getUserById,
-  getWatchLater,
   givePremium,
-  isInFavourites,
-  isInWatchLater,
   loginUser,
   registerUser,
   removeMovieFromFavourites,
@@ -23,7 +19,7 @@ import {
   updateUserByEmail,
   updateUserById,
   verifyUser,
-} from "../services/user.service.js";
+} from "../services/user.service";
 
 const router = Router();
 
@@ -46,13 +42,9 @@ router.get("/:id/verify/:token", verifyUser);
 router.delete("/deletetoken/:id", deleteVerifyTokenByUserId);
 router.post("/resendtoken/:id", resendToken);
 
-router.get("/:userId/favourites", getFavourites);
-router.get("/:userId/isInFavourites/:movieId", isInFavourites);
 router.post("/:userId/amtf/:movieId", addMovieToFavourites);
 router.delete("/:userId/rmff/:favMovieId", removeMovieFromFavourites);
 
-router.get("/:userId/watchlater", getWatchLater);
-router.get("/:userId/isInWatchLater/:movieId", isInWatchLater);
 router.post("/:userId/wlm/:movieId", addMovieToWatchLater);
 router.delete("/:userId/rmwl/:wlmId", removeMovieFromWatchLater);
 

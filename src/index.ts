@@ -1,15 +1,15 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import userRoutes from "./routes/user.routes.js";
-import movieRoutes from "./routes/movie.routes.js";
-import apiKeyMiddleware from "./utils/apiKeyMiddleware.js";
-import { engine } from "express-handlebars";
+import userRoutes from "./routes/user.routes";
+import apiKeyMiddleware from "./middlewares/apiKeyMiddleware";
 import "dotenv/config";
-import { sendMail } from "./utils/sendMail.js";
 
 const app = express();
-const MONGODB_KEY = process.env.MONGODB_KEY;
+const MONGODB_KEY = process.env.MONGODB_KEY || "";
+if (!MONGODB_KEY) {
+  throw new Error("MONGODB_KEY is not defined in the environment variables");
+}
 const PORT = process.env.PORT;
 
 app.use(cors());
@@ -27,7 +27,6 @@ mongoose
   });
 app.use(apiKeyMiddleware);
 app.use("/users", userRoutes);
-app.use("/movies", movieRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
