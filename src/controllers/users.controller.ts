@@ -1,4 +1,5 @@
 import {
+  addDoc,
   collection,
   deleteDoc,
   doc,
@@ -16,9 +17,15 @@ import {
   verifyToken,
 } from "../middlewares/verifyTokenMiddleware";
 import { Message } from "../interfaces/messages";
-import { DecodedUserRequest, User } from "../interfaces/users";
+import { DecodedUser, DecodedUserRequest, User } from "../interfaces/users";
+import bcrypt from "bcrypt";
+import { getFormattedDateAndTime } from "../utils/defaults";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { sendMail } from "../utils/sendMail";
 
 const usersCollection = collection(db, "users");
+const tokensCollection = collection(db, "verifyTokens");
 
 export const getAllUsers = [
   verifyAdminToken,
@@ -213,3 +220,49 @@ export const deleteMyself = [
     }
   },
 ];
+
+export const registerUser = async (req: Request, res: Response) => {
+  try {
+    const { firstname, lastname, email, password } = req.body as User;
+    const user = await getDocs(
+      query(usersCollection, where("email", "==", req.body.email))
+    );
+    if (!user.empty) {
+      res.status(409).json({ message: "User already exists" } as Message);
+    } else {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      const newUser = await addDoc(usersCollection, {
+        firstname,
+        lastname: lastname || "",
+        email,
+        password: hashedPassword,
+        createdAt: getFormattedDateAndTime(),
+        isAdmin: false,
+        isBanned: false,
+        isVerified: false,
+      } as User);
+
+      const newVerifyToken = {
+        uid: newUser.id,
+        token: crypto.randomBytes(3).toString("hex").toUpperCase(),
+      };
+      const jwtToken = jwt.sign(
+        { uid: newUser.id, isAdmin: false, isVerified: false } as DecodedUser,
+        process.env.JWT_SECRET as string
+      );
+
+      await addDoc(tokensCollection, newVerifyToken);
+      await sendMail(
+        email,
+        "Verify your email",
+        `Your verification token: ${newVerifyToken.token}`
+      );
+
+      res.status(201).json({ token: jwtToken });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" } as Message);
+  }
+};
