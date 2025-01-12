@@ -266,3 +266,33 @@ export const registerUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" } as Message);
   }
 };
+
+export const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body as User;
+    const user = await getDocs(
+      query(usersCollection, where("email", "==", email))
+    );
+    if (user.empty) {
+      res.status(404).json({ message: "User not found" } as Message);
+    } else {
+      const userData = user.docs[0].data() as User;
+      const isMatch = await bcrypt.compare(password, userData.password);
+      if (isMatch) {
+        const jwtToken = jwt.sign(
+          {
+            uid: user.docs[0].id,
+            isAdmin: userData.isAdmin,
+            isVerified: userData.isVerified,
+          } as DecodedUser,
+          process.env.JWT_SECRET as string
+        );
+        res.status(200).json({ token: jwtToken });
+      } else {
+        res.status(401).json({ message: "Invalid credentials" } as Message);
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" } as Message);
+  }
+};
