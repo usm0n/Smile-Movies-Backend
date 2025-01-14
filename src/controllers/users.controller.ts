@@ -17,7 +17,12 @@ import {
   verifyToken,
 } from "../middlewares/verifyTokenMiddleware";
 import { Message } from "../interfaces/messages";
-import { DecodedUser, DecodedUserRequest, User } from "../interfaces/users";
+import {
+  DecodedUser,
+  DecodedUserRequest,
+  User,
+  UserVerifyToken,
+} from "../interfaces/users";
 import bcrypt from "bcrypt";
 import { getFormattedDateAndTime } from "../utils/defaults";
 import jwt from "jsonwebtoken";
@@ -247,7 +252,7 @@ export const registerUser = async (req: Request, res: Response) => {
       const newVerifyToken = {
         uid: newUser.id,
         token: crypto.randomBytes(3).toString("hex").toUpperCase(),
-      };
+      } as UserVerifyToken;
       const jwtToken = jwt.sign(
         { uid: newUser.id, isAdmin: false, isVerified: false } as DecodedUser,
         process.env.JWT_SECRET as string
@@ -296,3 +301,41 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" } as Message);
   }
 };
+
+export const verifyUser = [
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const uid = (req as DecodedUserRequest).uid;
+      const user = await getDoc(doc(usersCollection, uid));
+      const isVerified = (user.data() as User).isVerified;
+      if (!user.exists()) {
+        res.status(404).json({ message: "User not found" } as Message);
+      } else {
+        if (isVerified) {
+          return res
+            .status(400)
+            .json({ message: "User already verified" } as Message);
+        }
+        const tokenQuery = query(
+          tokensCollection,
+          where("uid", "==", uid),
+          where("token", "==", req.params.token)
+        );
+        const tokenDocs = await getDocs(tokenQuery);
+
+        if (tokenDocs.empty) {
+          return res
+            .status(404)
+            .json({ message: "Token not found" } as Message);
+        }
+
+        await updateDoc(doc(usersCollection, uid), { isVerified: true });
+        await deleteDoc(tokenDocs.docs[0].ref);
+        res.status(200).json({ message: "User verified" } as Message);
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" } as Message);
+    }
+  },
+];

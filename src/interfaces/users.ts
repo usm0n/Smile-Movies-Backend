@@ -23,3 +23,8 @@ export interface User {
   isAdmin: boolean;
   isBanned: boolean;
 }
+
+export interface UserVerifyToken {
+  uid: string;
+  token: string;
+}
