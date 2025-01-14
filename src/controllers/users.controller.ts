@@ -405,3 +405,41 @@ export const forgotPassword = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" } as Message);
   }
 };
+
+export const resendForgotPasswordToken = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const email = req.body.email;
+    const user = await getDocs(
+      query(usersCollection, where("email", "==", email))
+    );
+    if (user.empty) {
+      res.status(404).json({ message: "User not found" } as Message);
+    } else {
+      const tokenQuery = query(
+        resetTokensCollection,
+        where("uid", "==", user.docs[0].id)
+      );
+      const tokenDocs = await getDocs(tokenQuery);
+      if (!tokenDocs.empty) {
+        await deleteDoc(doc(resetTokensCollection, tokenDocs.docs[0].id));
+      }
+      const resetToken = {
+        uid: user.docs[0].id,
+        token: crypto.randomBytes(16).toString("hex").toUpperCase(),
+      } as UserVerifyToken;
+      await addDoc(resetTokensCollection, resetToken);
+      const resetURL = `${process.env.CLIENT_URL}/reset-password/${email}/${resetToken.token}`;
+      await sendMail(
+        email,
+        "Reset your password",
+        `Reset your password by visiting this link: ${resetURL}`
+      );
+      res.status(200).json({ message: "Reset password link sent" } as Message);
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" } as Message);
+  }
+};
