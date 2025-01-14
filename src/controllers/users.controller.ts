@@ -443,3 +443,35 @@ export const resendForgotPasswordToken = async (
     res.status(500).json({ message: "Internal server error" } as Message);
   }
 };
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const email = req.params.email;
+    const user = await getDocs(
+      query(usersCollection, where("email", "==", email))
+    );
+    if (user.empty) {
+      res.status(404).json({ message: "User not found" } as Message);
+    } else {
+      const tokenQuery = query(
+        resetTokensCollection,
+        where("uid", "==", user.docs[0].id),
+        where("token", "==", req.params.token)
+      );
+      const tokenDocs = await getDocs(tokenQuery);
+      if (tokenDocs.empty) {
+        res.status(404).json({ message: "Token not found" } as Message);
+      } else {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        await updateDoc(doc(usersCollection, user.docs[0].id), {
+          password: hashedPassword,
+        });
+        await deleteDoc(doc(resetTokensCollection, tokenDocs.docs[0].id));
+        res.status(200).json({ message: "Password reset" } as Message);
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" } as Message);
+  }
+}
