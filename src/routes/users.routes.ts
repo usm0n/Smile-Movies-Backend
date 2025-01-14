@@ -4,15 +4,15 @@ import * as userController from "../controllers/users.controller";
 const router = Router();
 
 router.get("/", userController.getAllUsers);
-router.get("/:id", userController.getUserById);
+router.get("/id/:id", userController.getUserById);
 router.get("/email/:email", userController.getUserByEmail);
 router.get("/myself", userController.getMyself);
 
-router.put("/:id", userController.updateUserById);
+router.put("/id/:id", userController.updateUserById);
 router.put("/email/:email", userController.updateUserByEmail);
 router.put("/myself", userController.updateMyself);
 
-router.delete("/:id", userController.deleteUserById);
+router.delete("/id/:id", userController.deleteUserById);
 router.delete("/email/:email", userController.deleteUserByEmail);
 router.delete("/myself", userController.deleteMyself);
 

@@ -12,11 +12,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../config";
 import { Request, Response } from "express";
-import {
-  verifyAdminToken,
-  verifyToken,
-} from "../middlewares/auth.middleware.js";
-import { Message } from "../interfaces/messages";
+import { verifyAdminToken, verifyToken } from "../middlewares/auth.middleware";
+import { ErrorMSG, Message } from "../interfaces/messages";
 import {
   DecodedUser,
   DecodedUserRequest,
@@ -28,6 +25,7 @@ import { getFormattedDateAndTime } from "../utils/defaults";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendMail } from "../utils/sendMail";
+import "dotenv/config";
 
 const usersCollection = collection(db, "users");
 const tokensCollection = collection(db, "verifyTokens");
@@ -49,8 +47,12 @@ export const getAllUsers = [
         }));
         res.status(200).json(users as User[]);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -66,8 +68,12 @@ export const getUserById = [
       } else {
         res.status(200).json({ id: user.id, ...user.data() } as User);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -88,8 +94,12 @@ export const getUserByEmail = [
         }))[0];
         res.status(200).json(user as User);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -105,27 +115,63 @@ export const getMyself = [
       } else {
         res.status(200).json({ id: user.id, ...user.data() } as User);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
-
 export const updateUserById = [
   verifyAdminToken,
   async (req: Request, res: Response) => {
     try {
+      const { firstname, lastname, email, password }: User = req.body;
       const uid = req.params.id;
       const userDoc = doc(usersCollection, uid);
       const user = await getDoc(userDoc);
       if (!user.exists()) {
         res.status(404).json({ message: "User not found" } as Message);
       } else {
-        await updateDoc(userDoc, req.body);
+        let hashedPassword;
+        if (password && password !== user.data().password) {
+          const salt = await bcrypt.genSalt(10);
+          hashedPassword = await bcrypt.hash(password, salt);
+        }
+        if (email && email !== user.data().email) {
+          const user = await getDocs(
+            query(usersCollection, where("email", "==", email))
+          );
+          if (!user.empty) {
+            return res
+              .status(409)
+              .json({ message: "User already exists" } as Message);
+          }
+        }
+        await updateDoc(userDoc, {
+          firstname,
+          lastname: lastname || "",
+          email:
+            email && email !== user.data().email ? email : user.data().email,
+          password:
+            password && password !== user.data().password
+              ? hashedPassword
+              : user.data().password,
+          isVerified:
+            email && email !== user.data().email
+              ? false
+              : user.data().isVerified,
+        } as Partial<User>);
         res.status(200).json({ id: user.id, ...req.body } as User);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -134,18 +180,56 @@ export const updateUserByEmail = [
   verifyAdminToken,
   async (req: Request, res: Response) => {
     try {
-      const email = req.params.email;
-      const usersQuery = query(usersCollection, where("email", "==", email));
+      const { firstname, lastname, email, password }: User = req.body;
+      const currentEmail = req.params.email;
+      const usersQuery = query(
+        usersCollection,
+        where("email", "==", currentEmail)
+      );
       const usersDocs = await getDocs(usersQuery);
       if (usersDocs.empty) {
         res.status(404).json({ message: "User not found" } as Message);
       } else {
-        const user = usersDocs.docs[0];
-        await updateDoc(user.ref, req.body);
-        res.status(200).json({ id: user.id, ...req.body } as User);
+        const userDoc = usersDocs.docs[0].ref;
+        let hashedPassword;
+        if (password && password !== usersDocs.docs[0].data().password) {
+          const salt = await bcrypt.genSalt(10);
+          hashedPassword = await bcrypt.hash(password, salt);
+        }
+        if (email && email !== usersDocs.docs[0].data().email) {
+          const user = await getDocs(
+            query(usersCollection, where("email", "==", email))
+          );
+          if (!user.empty) {
+            return res
+              .status(409)
+              .json({ message: "User already exists" } as Message);
+          }
+        }
+        await updateDoc(userDoc, {
+          firstname,
+          lastname: lastname || "",
+          email:
+            email && email !== usersDocs.docs[0].data().email
+              ? email
+              : usersDocs.docs[0].data().email,
+          password:
+            password && password !== usersDocs.docs[0].data().password
+              ? hashedPassword
+              : usersDocs.docs[0].data().password,
+          isVerified:
+            email && email !== usersDocs.docs[0].data().email
+              ? false
+              : usersDocs.docs[0].data().isVerified,
+        } as Partial<User>);
+        res.status(200).json({ id: usersDocs.docs[0].id, ...req.body } as User);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -154,17 +238,50 @@ export const updateMyself = [
   verifyToken,
   async (req: Request, res: Response) => {
     try {
+      const { firstname, lastname, email, password }: User = req.body;
       const uid = (req as DecodedUserRequest).uid;
       const userDoc = doc(usersCollection, uid);
       const user = await getDoc(userDoc);
       if (!user.exists()) {
         res.status(404).json({ message: "User not found" } as Message);
       } else {
-        await updateDoc(userDoc, req.body);
+        let hashedPassword;
+        if (password && password !== user.data().password) {
+          const salt = await bcrypt.genSalt(10);
+          hashedPassword = await bcrypt.hash(password, salt);
+        }
+        if (email && email !== user.data().email) {
+          const user = await getDocs(
+            query(usersCollection, where("email", "==", email))
+          );
+          if (!user.empty) {
+            return res
+              .status(409)
+              .json({ message: "User already exists" } as Message);
+          }
+        }
+        await updateDoc(userDoc, {
+          firstname,
+          lastname: lastname || "",
+          email:
+            email && email !== user.data().email ? email : user.data().email,
+          password:
+            password && password !== user.data().password
+              ? hashedPassword
+              : user.data().password,
+          isVerified:
+            email && email !== user.data().email
+              ? false
+              : user.data().isVerified,
+        } as Partial<User>);
         res.status(200).json({ id: user.id, ...req.body } as User);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -182,8 +299,12 @@ export const deleteUserById = [
         await deleteDoc(userDoc);
         res.status(200).json({ message: "User deleted" } as Message);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -202,8 +323,12 @@ export const deleteUserByEmail = [
         await deleteDoc(user.ref);
         res.status(200).json({ message: "User deleted" } as Message);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -221,8 +346,12 @@ export const deleteMyself = [
         await deleteDoc(userDoc);
         res.status(200).json({ message: "User deleted" } as Message);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -268,8 +397,12 @@ export const registerUser = async (req: Request, res: Response) => {
 
       res.status(201).json({ token: jwtToken });
     }
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" } as Message);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message } as
+        | Message
+        | ErrorMSG);
   }
 };
 
@@ -298,8 +431,12 @@ export const loginUser = async (req: Request, res: Response) => {
         res.status(401).json({ message: "Invalid credentials" } as Message);
       }
     }
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" } as Message);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message } as
+        | Message
+        | ErrorMSG);
   }
 };
 
@@ -335,8 +472,12 @@ export const verifyUser = [
         await deleteDoc(tokenDocs.docs[0].ref);
         res.status(200).json({ message: "User verified" } as Message);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -373,8 +514,12 @@ export const resendVerificationToken = [
         );
         res.status(200).json({ message: "Verification token sent" } as Message);
       }
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" } as Message);
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
     }
   },
 ];
@@ -401,8 +546,12 @@ export const forgotPassword = async (req: Request, res: Response) => {
       );
       res.status(200).json({ message: "Reset password link sent" } as Message);
     }
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" } as Message);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message } as
+        | Message
+        | ErrorMSG);
   }
 };
 
@@ -439,8 +588,12 @@ export const resendForgotPasswordToken = async (
       );
       res.status(200).json({ message: "Reset password link sent" } as Message);
     }
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" } as Message);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message } as
+        | Message
+        | ErrorMSG);
   }
 };
 
@@ -471,7 +624,11 @@ export const resetPassword = async (req: Request, res: Response) => {
         res.status(200).json({ message: "Password reset" } as Message);
       }
     }
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" } as Message);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message } as
+        | Message
+        | ErrorMSG);
   }
-}
+};
