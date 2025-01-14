@@ -339,3 +339,41 @@ export const verifyUser = [
     }
   },
 ];
+
+export const resendVerificationToken = [
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const uid = (req as DecodedUserRequest).uid;
+      const user = await getDoc(doc(usersCollection, uid));
+      if (!user.exists()) {
+        res.status(404).json({ message: "User not found" } as Message);
+      } else {
+        const isVerified = (user.data() as User).isVerified;
+        if (isVerified) {
+          return res
+            .status(400)
+            .json({ message: "User already verified" } as Message);
+        }
+        const tokenQuery = query(tokensCollection, where("uid", "==", uid));
+        const tokenDocs = await getDocs(tokenQuery);
+        if (!tokenDocs.empty) {
+          await deleteDoc(doc(tokensCollection, tokenDocs.docs[0].id));
+        }
+        const newToken = {
+          uid,
+          token: crypto.randomBytes(3).toString("hex").toUpperCase(),
+        } as UserVerifyToken;
+        await addDoc(tokensCollection, newToken);
+        await sendMail(
+          (user.data() as User).email,
+          "Verify your email",
+          `Your verification token: ${newToken.token}`
+        );
+        res.status(200).json({ message: "Verification token sent" } as Message);
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" } as Message);
+    }
+  },
+];
