@@ -15,7 +15,7 @@ import { Request, Response } from "express";
 import {
   verifyAdminToken,
   verifyToken,
-} from "../middlewares/verifyTokenMiddleware";
+} from "../middlewares/auth.middleware.js";
 import { Message } from "../interfaces/messages";
 import {
   DecodedUser,
