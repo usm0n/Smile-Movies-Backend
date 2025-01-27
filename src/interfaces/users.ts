@@ -12,6 +12,11 @@ export interface DecodedUserRequest extends Request {
   isVerified: boolean;
 }
 
+export interface Watchlist {
+  type: string;
+  id: string;
+}
+
 export interface User {
   id: string;
   firstname: string;
@@ -22,6 +27,8 @@ export interface User {
   isVerified: boolean;
   isAdmin: boolean;
   isBanned: boolean;
+  watchlist: Watchlist[]
+  favorites: Watchlist[]
 }
 
 export interface UserVerifyToken {

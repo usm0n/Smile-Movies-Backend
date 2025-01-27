@@ -19,6 +19,7 @@ import {
   DecodedUserRequest,
   User,
   UserVerifyToken,
+  Watchlist,
 } from "../interfaces/users";
 import bcrypt from "bcrypt";
 import { getFormattedDateAndTime } from "../utils/defaults";
@@ -377,7 +378,9 @@ export const registerUser = async (req: Request, res: Response) => {
         isAdmin: false,
         isBanned: false,
         isVerified: false,
-      } as User);
+        watchlist: [],
+        favorites: [],
+      } as Partial<User>);
 
       const newVerifyToken = {
         uid: newUser.id,
@@ -632,3 +635,145 @@ export const resetPassword = async (req: Request, res: Response) => {
         | ErrorMSG);
   }
 };
+
+export const addToWatchlist = [
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const uid = (req as DecodedUserRequest).uid;
+      const movieId = req.params.movieId;
+      const typeMovie = req.params.typeMovie;
+      const userDoc = doc(usersCollection, uid);
+      const user = await getDoc(userDoc);
+      if (!user.exists()) {
+        res.status(404).json({ message: "User not found" } as Message);
+      } else {
+        const watchlist = (user.data() as User)?.watchlist || [];
+        if (watchlist.includes({ id: movieId, type: typeMovie })) {
+          res
+            .status(400)
+            .json({ message: "Movie already in watchlist" } as Message);
+        } else {
+          await updateDoc(userDoc, {
+            watchlist: [
+              ...watchlist,
+              { id: movieId, type: typeMovie } as Watchlist,
+            ],
+          });
+          res
+            .status(200)
+            .json({ message: "Movie added to watchlist" } as Message);
+        }
+      }
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
+    }
+  },
+];
+
+export const deleteFromWatchlist = [
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const uid = (req as DecodedUserRequest).uid;
+      const movieId = req.params.movieId;
+      const typeMovie = req.params.typeMovie;
+      const userDoc = doc(usersCollection, uid);
+      const user = await getDoc(userDoc);
+      if (!user.exists()) {
+        res.status(404).json({ message: "User not found" } as Message);
+      } else {
+        const watchlist = (user.data() as User)?.watchlist || [];
+        const newWatchlist = watchlist.filter(
+          (movie) => movie.id !== movieId || movie.type !== typeMovie
+        );
+        await updateDoc(userDoc, {
+          watchlist: newWatchlist,
+        });
+        res
+          .status(200)
+          .json({ message: "Movie deleted from watchlist" } as Message);
+      }
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
+    }
+  },
+];
+export const addToFavorites = [
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const uid = (req as DecodedUserRequest).uid;
+      const movieId = req.params.movieId;
+      const typeMovie = req.params.typeMovie;
+      const userDoc = doc(usersCollection, uid);
+      const user = await getDoc(userDoc);
+      if (!user.exists()) {
+        res.status(404).json({ message: "User not found" } as Message);
+      } else {
+        const favorites = (user.data() as User)?.favorites || [];
+        if (favorites.includes({ id: movieId, type: typeMovie })) {
+          res
+            .status(400)
+            .json({ message: "Movie already in favorites" } as Message);
+        } else {
+          await updateDoc(userDoc, {
+            favorites: [
+              ...favorites,
+              { id: movieId, type: typeMovie } as Watchlist,
+            ],
+          });
+          res
+            .status(200)
+            .json({ message: "Movie added to favorites" } as Message);
+        }
+      }
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
+    }
+  },
+];
+export const deleteFromFavorites = [
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const uid = (req as DecodedUserRequest).uid;
+      const movieId = req.params.movieId;
+      const typeMovie = req.params.typeMovie;
+      const userDoc = doc(usersCollection, uid);
+      const user = await getDoc(userDoc);
+      if (!user.exists()) {
+        res.status(404).json({ message: "User not found" } as Message);
+      } else {
+        const favorites = (user.data() as User)?.favorites || [];
+        const newFavorites = favorites.filter(
+          (movie) => movie.id !== movieId || movie.type !== typeMovie
+        );
+        await updateDoc(userDoc, {
+          favorites: newFavorites,
+        });
+        res
+          .status(200)
+          .json({ message: "Movie deleted from favorites" } as Message);
+      }
+    } catch (error: any) {
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message } as
+          | Message
+          | ErrorMSG);
+    }
+  },
+];
