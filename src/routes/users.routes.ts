@@ -23,8 +23,23 @@ router.post("/verify/:token", userController.verifyUser);
 router.post("/resendVericationToken", userController.resendVerificationToken);
 
 router.post("/forgotPassword", userController.forgotPassword);
-router.post("/resendForgotPasswordToken", userController.resendForgotPasswordToken);
+router.post(
+  "/resendForgotPasswordToken",
+  userController.resendForgotPasswordToken
+);
 
 router.post("/resetPassword/:email/:token", userController.resetPassword);
+
+router.post("/watchlist/:typeMovie/:movieId", userController.addToWatchlist);
+router.delete(
+  "/watchlist/:typeMovie/:movieId",
+  userController.deleteFromWatchlist
+);
+
+router.post("/favorites/:typeMovie/:movieId", userController.addToFavorites);
+router.delete(
+  "/favorites/:typeMovie/:movieId",
+  userController.deleteFromFavorites
+);
 
 export default router;

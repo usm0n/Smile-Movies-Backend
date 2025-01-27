@@ -648,8 +648,12 @@ export const addToWatchlist = [
       if (!user.exists()) {
         res.status(404).json({ message: "User not found" } as Message);
       } else {
-        const watchlist = (user.data() as User)?.watchlist || [];
-        if (watchlist.includes({ id: movieId, type: typeMovie })) {
+        const watchlist: Watchlist[] = (user.data() as User)?.watchlist || [];
+        if (
+          watchlist.some(
+            (item) => item.id === movieId && item.type === typeMovie
+          )
+        ) {
           res
             .status(400)
             .json({ message: "Movie already in watchlist" } as Message);
@@ -720,7 +724,11 @@ export const addToFavorites = [
         res.status(404).json({ message: "User not found" } as Message);
       } else {
         const favorites = (user.data() as User)?.favorites || [];
-        if (favorites.includes({ id: movieId, type: typeMovie })) {
+        if (
+          favorites.some(
+            (item) => item.id === movieId && item.type === typeMovie
+          )
+        ) {
           res
             .status(400)
             .json({ message: "Movie already in favorites" } as Message);
