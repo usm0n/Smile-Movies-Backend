@@ -19,6 +19,7 @@ export interface Watchlist {
 
 export interface User {
   id: string;
+  profilePic?: string;
   firstname: string;
   lastname?: string;
   email: string;
@@ -27,11 +28,13 @@ export interface User {
   isVerified: boolean;
   isAdmin: boolean;
   isBanned: boolean;
-  watchlist: Watchlist[]
-  favorites: Watchlist[]
+  watchlist: Watchlist[];
+  favorites: Watchlist[];
 }
 
 export interface UserVerifyToken {
   uid: string;
   token: string;
 }
+
+export interface GoogleUserResponse {}

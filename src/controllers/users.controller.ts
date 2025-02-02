@@ -359,7 +359,8 @@ export const deleteMyself = [
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { firstname, lastname, email, password } = req.body as User;
+    const { firstname, lastname, email, password, isVerified, profilePic } =
+      req.body as User;
     const user = await getDocs(
       query(usersCollection, where("email", "==", req.body.email))
     );
@@ -370,6 +371,7 @@ export const registerUser = async (req: Request, res: Response) => {
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const newUser = await addDoc(usersCollection, {
+        profilePic: profilePic || "",
         firstname,
         lastname: lastname || "",
         email,
@@ -377,7 +379,7 @@ export const registerUser = async (req: Request, res: Response) => {
         createdAt: getFormattedDateAndTime(),
         isAdmin: false,
         isBanned: false,
-        isVerified: false,
+        isVerified: isVerified || false,
         watchlist: [],
         favorites: [],
       } as Partial<User>);
@@ -387,7 +389,11 @@ export const registerUser = async (req: Request, res: Response) => {
         token: crypto.randomBytes(3).toString("hex").toUpperCase(),
       } as UserVerifyToken;
       const jwtToken = jwt.sign(
-        { uid: newUser.id, isAdmin: false, isVerified: false } as DecodedUser,
+        {
+          uid: newUser.id,
+          isAdmin: false,
+          isVerified: isVerified || false,
+        } as DecodedUser,
         process.env.JWT_SECRET as string
       );
 
