@@ -398,11 +398,14 @@ export const registerUser = async (req: Request, res: Response) => {
       );
 
       await addDoc(tokensCollection, newVerifyToken);
-      await sendMail(
-        email,
-        "Verify your email",
-        `Your verification token: ${newVerifyToken.token}`
-      );
+      
+      if (!isVerified) {
+        await sendMail(
+          email,
+          "Verify your email",
+          `Your verification token: ${newVerifyToken.token}`
+        );
+      }
 
       res.status(201).json({ token: jwtToken });
     }
