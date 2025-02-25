@@ -3,7 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 import apiKeyMiddleware from "./middlewares/apiKey.middleware";
 import userRouter from "./routes/users.routes";
-import jwt from "jsonwebtoken";
+import { proxy } from "./controllers/playerProxy.controller";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+app.use("/vidsrc", proxy);
 
 app.use(apiKeyMiddleware);
 app.get("/", apiKeyMiddleware, (req, res) => {
