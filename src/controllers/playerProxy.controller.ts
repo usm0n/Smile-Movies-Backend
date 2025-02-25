@@ -46,12 +46,12 @@ const modifyResponse = (proxyRes: IncomingMessage, res: Response) => {
   
   // Proxy Middleware
   export const proxy = createProxyMiddleware({
-    target: "https://vidsrc.net",
+    target: "https://vidsrc.xyz",
     changeOrigin: true,
     selfHandleResponse: true,
     on: {
       proxyReq: (proxyReq) => {
-        proxyReq.setHeader("Referer", "https://vidsrc.net/");
+        proxyReq.setHeader("Referer", "https://vidsrc.xyz");
         proxyReq.setHeader("Accept-Encoding", "gzip, deflate, br");
       },
       proxyRes: (proxyRes, req, res) => {
